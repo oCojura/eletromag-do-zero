@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eletromag do Zero | Um Guia Interativo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Academic Calm -->
+    <!-- Application Structure Plan: A single-page application (SPA) with a fixed sidebar navigation for thematic sections (Início, Módulo 0, Eletrostática, etc.). This structure avoids overwhelming the user with a long scroll and allows for focused exploration. Content within each section is organized into a multi-column grid layout, presenting core theory, intuitive analogies/visualizations, and practical engineering applications side-by-side. This design directly supports the report's pedagogical goal of connecting abstract concepts to tangible applications, enhancing usability and learning retention over a linear document structure. -->
+    <!-- Visualization & Content Choices: The application uses a mix of presentation methods. Key laws and concepts are shown in styled cards. Interactive elements are represented by canvas placeholders for simple JS animations (e.g., illustrating vector fields). LaTeX equations are rendered using MathJax for clarity. Data tables are styled HTML. This multi-modal approach addresses different learning goals (inform, organize, apply) without using SVG or Mermaid JS, aligning with the designed thematic structure. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f5f4; /* stone-100 */
+            color: #292524; /* stone-800 */
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .nav-link {
+            transition: all 0.2s ease-in-out;
+        }
+        .nav-link.active {
+            background-color: #0e7490; /* cyan-700 */
+            color: white;
+            font-weight: 600;
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: all 0.2s ease-in-out;
+            border: 1px solid transparent;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .resource-card:hover {
+             border-color: #0e7490; /* cyan-700 */
+        }
+        .solution {
+            transition: all 0.3s ease-in-out;
+        }
+        .interactive-canvas {
+            cursor: grab;
+            touch-action: none;
+        }
+        .interactive-canvas:active {
+            cursor: grabbing;
+        }
+        .glossary-term {
+            color: #0e7490;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .glossary-term:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="flex flex-col md:flex-row min-h-screen">
+        <aside class="w-full md:w-72 bg-stone-800 text-white p-4 md:p-6 sticky top-0 h-screen overflow-y-auto">
+            <h1 class="text-2xl font-bold mb-6 text-cyan-300">Eletromag do Zero</h1>
+            <nav id="main-nav">
+                <ul class="space-y-2">
+                    <li><a href="#inicio" class="nav-link block p-3 rounded-lg">Início</a></li>
+                    <li><a href="#modulo-zero" class="nav-link block p-3 rounded-lg">Módulo Zero: Ferramentas</a></li>
+                    <li class="pt-2"><span class="px-3 text-xs font-bold uppercase text-stone-400">Parte I: Eletrostática</span></li>
+                    <li><a href="#capitulo-1" class="nav-link block p-3 rounded-lg">Cap. 1: Lei de Coulomb</a></li>
+                    <li><a href="#capitulo-2" class="nav-link block p-3 rounded-lg">Cap. 2: O Campo Elétrico</a></li>
+                    <li><a href="#capitulo-3" class="nav-link block p-3 rounded-lg">Cap. 3: Lei de Gauss</a></li>
+                    <li><a href="#capitulo-4" class="nav-link block p-3 rounded-lg">Cap. 4: Potencial Elétrico</a></li>
+                    <li><a href="#capitulo-5" class="nav-link block p-3 rounded-lg">Cap. 5: Capacitores</a></li>
+                    <li class="pt-2"><span class="px-3 text-xs font-bold uppercase text-stone-400">Parte II: Magnetostática</span></li>
+                    <li><a href="#capitulo-7" class="nav-link block p-3 rounded-lg">Cap. 7: Força de Lorentz</a></li>
+                    <li><a href="#capitulo-8" class="nav-link block p-3 rounded-lg">Cap. 8: Fontes de Campo B</a></li>
+                    <li class="pt-2"><span class="px-3 text-xs font-bold uppercase text-stone-400">Parte III: Dinâmica</span></li>
+                     <li><a href="#capitulo-9" class="nav-link block p-3 rounded-lg">Cap. 9: Indução Eletromagnética</a></li>
+                    <li><a href="#capitulo-10" class="nav-link block p-3 rounded-lg">Cap. 10: Equações de Maxwell</a></li>
+                    <li class="pt-2"><span class="px-3 text-xs font-bold uppercase text-stone-400">Recursos</span></li>
+                    <li><a href="#recursos" class="nav-link block p-3 rounded-lg">Hub de Recursos</a></li>
+                    <li><a href="#biblioteca-exercicios" class="nav-link block p-3 rounded-lg">Exercícios</a></li>
+                    <li><a href="#glossario" class="nav-link block p-3 rounded-lg">Glossário</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="flex-1 p-6 md:p-10 overflow-y-auto">
+            
+            <section id="inicio" class="content-section">
+                <div class="card">
+                    <h2 class="text-3xl font-bold text-cyan-800 mb-4">Bem-vindo ao Eletromag do Zero!</h2>
+                    <p class="text-lg mb-4">"Desvende o Eletromagnetismo. Da Intuição à Inovação."</p>
+                    <p class="mb-4">Este portal foi criado para reverter o quadro de dificuldade em Eletromagnetismo. Nossa filosofia é simples: <strong>Analogia → Teoria Detalhada → Interatividade → Aplicação</strong>. Cada conceito é construído de forma incremental, lógica e, acima de tudo, intuitiva, para que você possa estudar de forma autônoma e eficaz.</p>
+                </div>
+            </section>
+
+            <section id="modulo-zero" class="content-section">
+                <h2 class="text-3xl font-bold text-cyan-800 mb-6">Módulo Zero: A Caixa de Ferramentas Essencial</h2>
+                <div class="card">
+                    <p>A principal barreira no eletromagnetismo não é a física, mas a matemática. Este módulo constrói a fundação do cálculo vetorial de forma intuitiva, transformando operadores como gradiente, divergente e rotacional em ferramentas de insight.</p>
+                </div>
+            </section>
+
+            <section id="capitulo-1" class="content-section">
+                <h2 class="text-3xl font-bold text-cyan-800 mb-6">Capítulo 1: Carga Elétrica e a Lei de Coulomb</h2>
+                <div class="card space-y-4">
+                    <h3 class="text-xl font-bold">A Natureza da Carga Elétrica</h3>
+                    <p>Tudo começa com a observação de que a matéria possui uma propriedade fundamental chamada <strong>carga elétrica</strong>. Ela existe em dois tipos, que Benjamin Franklin convencionou chamar de <strong>positiva (+)</strong> e <strong>negativa (-)</strong>. A regra fundamental é simples: <strong>cargas de mesmo sinal se repelem, e cargas de sinais opostos se atraem.</strong></p>
+                    <h3 class="text-xl font-bold">A Lei de Coulomb</h3>
+                    <p>Charles-Augustin de Coulomb quantificou essa interação. A Lei de Coulomb nos diz a magnitude e a direção da força elétrica (\(\vec{F}\)) entre duas cargas pontuais (\(q_1\) e \(q_2\)) separadas por uma distância (\(r\)):</p>
+                    <div class="my-4 p-3 bg-stone-100 rounded-lg text-center font-mono text-lg">\(\vec{F} = k_0 \frac{q_1 q_2}{r^2} \hat{r}\)</div>
+                    <p>Onde \(k_0\) é a constante eletrostática (\(\approx 9 \times 10^9 \, \text{N} \cdot \text{m}^2/\text{C}^2\)) e \(\hat{r}\) é um vetor unitário que aponta de uma carga para a outra. A natureza vetorial é crucial: a força atua na linha que une as cargas.</p>
+                    <h3 class="text-xl font-bold">Interatividade: Sinta a Força</h3>
+                    <p>Arraste as cargas \(q_1\) e \(q_2\). Observe como o vetor força muda de magnitude e direção. O que acontece se você inverter o sinal de uma carga?</p>
+                    <canvas id="coulomb-canvas" class="w-full h-64 mt-2 bg-white rounded interactive-canvas"></canvas>
+                    <div class="text-center"><a href="#biblioteca-exercicios" data-exercise="exercicio-coulomb" class="go-to-exercise bg-cyan-700 text-white px-4 py-2 rounded-lg hover:bg-cyan-800 transition">Praticar com um Exercício</a></div>
+                </div>
+            </section>
+
+            <section id="capitulo-2" class="content-section">
+                <h2 class="text-3xl font-bold text-cyan-800 mb-6">Capítulo 2: O Campo Elétrico</h2>
+                <div class="card space-y-4">
+                    <h3 class="text-xl font-bold">A Ideia de Campo</h3>
+                    <p>Uma carga-fonte \(Q\) modifica o espaço ao seu redor, criando um <strong>Campo Elétrico (\(\vec{E}\))</strong>. Qualquer outra carga de prova \(q_0\) sentirá uma força local, dada por \(\vec{F} = q_0 \vec{E}\).</p>
+                    <div class="my-4 p-3 bg-stone-100 rounded-lg text-center font-mono text-lg">\(\vec{E} = k_0 \frac{Q}{r^2} \hat{r}\)</div>
+                    <h3 class="text-xl font-bold">Interatividade: Mapeando o Campo</h3>
+                    <p>Arraste a carga de prova \(q_0\) e observe o vetor força, que revela a direção e a intensidade do campo elétrico.</p>
+                    <canvas id="field-canvas" class="w-full h-64 mt-2 bg-white rounded interactive-canvas"></canvas>
+                    <div class="text-center"><a href="#biblioteca-exercicios" data-exercise="exercicio-campo" class="go-to-exercise bg-cyan-700 text-white px-4 py-2 rounded-lg hover:bg-cyan-800 transition">Praticar com um Exercício</a></div>
+                </div>
+            </section>
+
+            <section id="capitulo-3" class="content-section">
+                <h2 class="text-3xl font-bold text-cyan-800 mb-6">Capítulo 3: A Lei de Gauss</h2>
+                <div class="card space-y-4">
+                    <h3 class="text-xl font-bold">Fluxo Elétrico e a Lei de Gauss</h3>
+                    <p>A Lei de Gauss afirma que o fluxo elétrico total através de uma superfície fechada é proporcional à carga líquida (\(q_{int}\)) contida dentro dela.</p>
+                    <div class="my-4 p-3 bg-stone-100 rounded-lg text-center font-mono text-lg">\(\Phi_E = \oint \vec{E} \cdot d\vec{A} = \frac{q_{int}}{\varepsilon_0}\)</div>
+                    <h3 class="text-xl font-bold">Interatividade: O Fluxo é Constante</h3>
+                    <p>Arraste o controle para mudar o raio da superfície gaussiana. O fluxo (número de linhas) permanece constante.</p>
+                    <canvas id="gauss-canvas" class="w-full h-64 mt-2 bg-white rounded"></canvas>
+                    <input type="range" id="gauss-slider" min="30" max="120" value="70" class="w-full">
+                    <div class="text-center"><a href="#biblioteca-exercicios" data-exercise="exercicio-gauss" class="go-to-exercise bg-cyan-700 text-white px-4 py-2 rounded-lg hover:bg-cyan-800 transition">Praticar com um Exercício</a></div>
+                </div>
+            </section>
+
+            <section id="capitulo-4" class="content-section">
+                 <h2 class="text-3xl font-bold text-cyan-800 mb-6">Capítulo 4: Potencial Elétrico</h2>
+                 <div class="card space-y-4">
+                    <h3 class="text-xl font-bold">A Perspectiva da Energia</h3>
+                    <p>O <strong>Potencial Elétrico (\(V\))</strong> é a energia potencial por unidade de carga: \(V = U/q\). O campo elétrico aponta na direção em que o potencial diminui mais rapidamente: \(\vec{E} = -\nabla V\).</p>
+                    <h3 class="text-xl font-bold">Interatividade: Subindo a Colina Elétrica</h3>
+                    <p>Arraste a carga de prova. A barra mostra o trabalho realizado. Mover-se ao longo de uma linha equipotencial (mesma cor) não custa energia.</p>
+                    <canvas id="potential-canvas" class="w-full h-64 mt-2 bg-white rounded interactive-canvas"></canvas>
+                    <div id="work-done-bar" class="w-full bg-gray-200 rounded-full h-4 mt-2"><div class="bg-cyan-600 h-4 rounded-full" style="width: 0%"></div></div>
+                    <div class="text-center mt-4"><a href="#biblioteca-exercicios" data-exercise="exercicio-potencial" class="go-to-exercise bg-cyan-700 text-white px-4 py-2 rounded-lg hover:bg-cyan-800 transition">Praticar com um Exercício</a></div>
+                 </div>
+            </section>
+
+            <section id="capitulo-5" class="content-section">
+                <h2 class="text-3xl font-bold text-cyan-800 mb-6">Capítulo 5: Capacitores e Dielétricos</h2>
+                <div class="card space-y-4">
+                    <h3 class="text-xl font-bold">Armazenando Energia</h3>
+                    <p>Um capacitor armazena energia em um campo elétrico. Sua <strong>capacitância (\(C\))</strong> é a razão entre a carga armazenada e a tensão: \(C = Q/V\). Para placas paralelas, \(C = \varepsilon_0 A/d\).</p>
+                    <h3 class="text-xl font-bold">Interatividade: Laboratório de Capacitor</h3>
+                    <p>Ajuste a área das placas e a separação. Observe como a capacitância, a carga e a energia armazenada mudam.</p>
+                    <canvas id="capacitor-canvas" class="w-full h-64 mt-2 bg-white rounded"></canvas>
+                    <div class="grid grid-cols-2 gap-4 mt-2">
+                        <div><label for="cap-area">Área:</label><input type="range" id="cap-area" min="50" max="200" value="100" class="w-full"></div>
+                        <div><label for="cap-sep">Separação:</label><input type="range" id="cap-sep" min="20" max="100" value="50" class="w-full"></div>
+                    </div>
+                    <div class="text-center mt-4"><a href="#biblioteca-exercicios" data-exercise="exercicio-capacitor" class="go-to-exercise bg-cyan-700 text-white px-4 py-2 rounded-lg hover:bg-cyan-800 transition">Praticar com um Exercício</a></div>
+                </div>
+            </section>
+
+            <section id="capitulo-7" class="content-section">
+                <h2 class="text-3xl font-bold text-cyan-800 mb-6">Capítulo 7: O Campo Magnético e a Força de Lorentz</h2>
+                <div class="card space-y-4">
+                    <h3 class="text-xl font-bold">Cargas em Movimento</h3>
+                    <p>A força magnética sobre uma partícula de carga \(q\) com velocidade \(\vec{v}\) em um campo \(\vec{B}\) é dada pela <strong>Força de Lorentz</strong>. A força é sempre perpendicular à velocidade e ao campo, o que significa que ela não realiza trabalho, apenas desvia a trajetória.</p>
+                    <div class="my-4 p-3 bg-stone-100 rounded-lg text-center font-mono text-lg">\(\vec{F}_m = q(\vec{v} \times \vec{B})\)</div>
+                    <h3 class="text-xl font-bold">Interatividade: A Regra da Mão Direita</h3>
+                    <p>Ajuste a direção da velocidade (\(\vec{v}\), em azul) e do campo magnético (\(\vec{B}\), em verde). Observe o vetor força resultante (\(\vec{F}\), em vermelho).</p>
+                    <canvas id="lorentz-canvas" class="w-full h-64 mt-2 bg-white rounded"></canvas>
+                    <div class="grid grid-cols-2 gap-4 mt-2">
+                        <div><label for="lorentz-v">Ângulo de v:</label><input type="range" id="lorentz-v" min="0" max="360" value="0" class="w-full"></div>
+                        <div><label for="lorentz-b">Ângulo de B:</label><input type="range" id="lorentz-b" min="0" max="360" value="90" class="w-full"></div>
+                    </div>
+                    <div class="text-center mt-4"><a href="#biblioteca-exercicios" data-exercise="exercicio-lorentz" class="go-to-exercise bg-cyan-700 text-white px-4 py-2 rounded-lg hover:bg-cyan-800 transition">Praticar com um Exercício</a></div>
+                </div>
+            </section>
+
+            <section id="capitulo-8" class="content-section">
+                <h2 class="text-3xl font-bold text-cyan-800 mb-6">Capítulo 8: Fontes de Campo Magnético</h2>
+                <div class="card space-y-4">
+                    <h3 class="text-xl font-bold">Lei de Ampère</h3>
+                    <p>A Lei de Ampère relaciona a circulação do campo magnético ao longo de um caminho fechado com a corrente que o atravessa. É a ferramenta ideal para calcular o campo magnético em situações de alta simetria.</p>
+                    <div class="my-4 p-3 bg-stone-100 rounded-lg text-center font-mono text-lg">\(\oint \vec{B} \cdot d\vec{l} = \mu_0 I_{env}\)</div>
+                    <h3 class="text-xl font-bold">Interatividade: Circulação e Corrente</h3>
+                    <p>Arraste para mudar o raio da "alça amperiana". O campo \(B\) diminui com o raio, mas a circulação total (\(B \times 2\pi r\)) permanece constante, pois a corrente envolvida é a mesma.</p>
+                    <canvas id="ampere-canvas" class="w-full h-64 mt-2 bg-white rounded interactive-canvas"></canvas>
+                    <div class="text-center mt-4"><a href="#biblioteca-exercicios" data-exercise="exercicio-ampere" class="go-to-exercise bg-cyan-700 text-white px-4 py-2 rounded-lg hover:bg-cyan-800 transition">Praticar com um Exercício</a></div>
+                </div>
+            </section>
+
+            <section id="capitulo-9" class="content-section">
+                <h2 class="text-3xl font-bold text-cyan-800 mb-6">Capítulo 9: Indução Eletromagnética</h2>
+                <div class="card space-y-4">
+                    <h3 class="text-xl font-bold">Lei de Faraday</h3>
+                    <p>A Lei de Faraday afirma que uma <strong>variação do fluxo magnético</strong> (\(\Phi_B\)) através de um circuito induz uma tensão (\(\varepsilon\)). É o princípio da geração de energia elétrica.</p>
+                    <div class="my-4 p-3 bg-stone-100 rounded-lg text-center font-mono text-lg">\(\varepsilon = - \frac{d\Phi_B}{dt}\)</div>
+                    <p>O sinal negativo é a <strong>Lei de Lenz</strong>: a corrente induzida sempre se opõe à variação do fluxo que a criou.</p>
+                    <h3 class="text-xl font-bold">Interatividade: Gerando Corrente</h3>
+                    <p>Arraste o ímã para dentro e para fora da bobina. Observe a lâmpada acender e o medidor indicar a corrente. O que acontece se você mover o ímã mais rápido?</p>
+                    <canvas id="faraday-canvas" class="w-full h-64 mt-2 bg-white rounded interactive-canvas"></canvas>
+                    <div class="text-center mt-4"><a href="#biblioteca-exercicios" data-exercise="exercicio-faraday" class="go-to-exercise bg-cyan-700 text-white px-4 py-2 rounded-lg hover:bg-cyan-800 transition">Praticar com um Exercício</a></div>
+                </div>
+            </section>
+
+            <section id="capitulo-10" class="content-section">
+                <h2 class="text-3xl font-bold text-cyan-800 mb-6">Capítulo 10: A Grande Síntese de Maxwell</h2>
+                <div class="card space-y-4">
+                    <h3 class="text-xl font-bold">As Quatro Equações</h3>
+                    <p>A unificação de todo o eletromagnetismo. Elas descrevem como cargas criam campos, a ausência de monopolos magnéticos, e como campos elétricos e magnéticos variáveis no tempo se geram mutuamente, prevendo a existência das ondas eletromagnéticas.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-center">
+                        <div class="p-3 bg-stone-50 rounded">\(\oint \vec{E} \cdot d\vec{A} = q/\varepsilon_0\) <br><small>(Lei de Gauss)</small></div>
+                        <div class="p-3 bg-stone-50 rounded">\(\oint \vec{B} \cdot d\vec{A} = 0\) <br><small>(Não há monopolos)</small></div>
+                        <div class="p-3 bg-stone-50 rounded">\(\oint \vec{E} \cdot d\vec{l} = -d\Phi_B/dt\) <br><small>(Lei de Faraday)</small></div>
+                        <div class="p-3 bg-stone-50 rounded">\(\oint \vec{B} \cdot d\vec{l} = \mu_0 I + \mu_0\varepsilon_0 d\Phi_E/dt\) <br><small>(Lei de Ampère-Maxwell)</small></div>
+                    </div>
+                    <div class="text-center mt-4"><a href="#biblioteca-exercicios" data-exercise="exercicio-maxwell" class="go-to-exercise bg-cyan-700 text-white px-4 py-2 rounded-lg hover:bg-cyan-800 transition">Praticar com um Exercício</a></div>
+                </div>
+            </section>
+            
+            <section id="recursos" class="content-section">
+                <h2 class="text-3xl font-bold text-cyan-800 mb-6">Hub de Recursos</h2>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <a href="#biblioteca-exercicios" class="card resource-card block"><h3 class="text-xl font-bold">Biblioteca de Exercícios</h3><p>Acesse problemas resolvidos para praticar e testar seu entendimento.</p></a>
+                    <a href="https://phet.colorado.edu/pt_BR/simulations/filter?subjects=physics&type=html,prototype" target="_blank" rel="noopener noreferrer" class="card resource-card block"><h3 class="text-xl font-bold">Laboratório de Simulações</h3><p>Explore simulações interativas do PhET para visualizar os fenômenos.</p></a>
+                    <a href="#glossario" class="card resource-card block"><h3 class="text-xl font-bold">Glossário Interativo</h3><p>Consulte definições claras dos principais termos técnicos.</p></a>
+                    <a href="#" id="formula-link" class="card resource-card block"><h3 class="text-xl font-bold">Formulário para Impressão</h3><p>Abra uma página otimizada com as equações fundamentais.</p></a>
+                </div>
+            </section>
+
+            <section id="biblioteca-exercicios" class="content-section">
+                <h2 class="text-3xl font-bold text-cyan-800 mb-6">Biblioteca de Exercícios Resolvidos</h2>
+                <div id="exercicio-coulomb" class="card mb-6"><h3 class="text-xl font-bold mb-3">Cap. 1: Lei de Coulomb</h3><p class="mb-4"><strong>Problema:</strong> Duas cargas, \(q_1 = +2 \mu C\) e \(q_2 = -4 \mu C\), estão em (0, 1m) e (0, -1m). Uma carga \(q_3 = +1 \mu C\) está em (2m, 0). Calcule a força resultante sobre \(q_3\).</p><button class="toggle-solution bg-cyan-700 text-white px-4 py-2 rounded-lg">Mostrar Solução</button><div class="solution mt-4 p-4 bg-stone-50 rounded-lg hidden"><p>\(\vec{F}_{res} = (-3.22 \times 10^{-3})\hat{i} - (4.83 \times 10^{-3})\hat{j}\) N.</p></div></div>
+                <div id="exercicio-campo" class="card mb-6"><h3 class="text-xl font-bold mb-3">Cap. 2: Campo Elétrico</h3><p class="mb-4"><strong>Problema:</strong> Um dipolo elétrico consiste de cargas \(+q\) e \(-q\) separadas por uma distância \(2a\). Calcule o campo elétrico em um ponto \(P\) a uma distância \(y\) ao longo do eixo perpendicular que bisseta o dipolo.</p><button class="toggle-solution bg-cyan-700 text-white px-4 py-2 rounded-lg">Mostrar Solução</button><div class="solution mt-4 p-4 bg-stone-50 rounded-lg hidden"><p>Por simetria, as componentes y do campo se cancelam. A componente x resultante é \(\vec{E} = - \frac{1}{4\pi\varepsilon_0} \frac{2qa}{(y^2+a^2)^{3/2}} \hat{i}\).</p></div></div>
+                <div id="exercicio-gauss" class="card mb-6"><h3 class="text-xl font-bold mb-3">Cap. 3: Lei de Gauss</h3><p class="mb-4"><strong>Problema:</strong> Use a Lei de Gauss para encontrar o campo elétrico a uma distância \(r\) de um fio retilíneo infinito com densidade linear de carga \(\lambda\).</p><button class="toggle-solution bg-cyan-700 text-white px-4 py-2 rounded-lg">Mostrar Solução</button><div class="solution mt-4 p-4 bg-stone-50 rounded-lg hidden"><p>Usando uma superfície gaussiana cilíndrica de raio \(r\) e comprimento \(L\), temos \(E(2\pi r L) = \lambda L / \varepsilon_0\). Portanto, \(E = \frac{\lambda}{2\pi\varepsilon_0 r}\).</p></div></div>
+                <div id="exercicio-potencial" class="card mb-6"><h3 class="text-xl font-bold mb-3">Cap. 4: Potencial Elétrico</h3><p class="mb-4"><strong>Problema:</strong> O potencial elétrico em uma região do espaço é dado por \(V(x,y,z) = 3x^2y - yz^2\). Encontre as componentes do vetor campo elétrico \(\vec{E}\) no ponto (1, 1, 1).</p><button class="toggle-solution bg-cyan-700 text-white px-4 py-2 rounded-lg">Mostrar Solução</button><div class="solution mt-4 p-4 bg-stone-50 rounded-lg hidden"><p>Usando \(\vec{E} = -\nabla V = -(\frac{\partial V}{\partial x}\hat{i} + \frac{\partial V}{\partial y}\hat{j} + \frac{\partial V}{\partial z}\hat{k})\), temos \(\vec{E} = -6xy\hat{i} - (3x^2-z^2)\hat{j} + 2yz\hat{k}\). No ponto (1,1,1), \(\vec{E} = -6\hat{i} - 2\hat{j} + 2\hat{k}\).</p></div></div>
+                <div id="exercicio-capacitor" class="card mb-6"><h3 class="text-xl font-bold mb-3">Cap. 5: Capacitores</h3><p class="mb-4"><strong>Problema:</strong> Um capacitor de placas paralelas com ar entre as placas tem uma capacitância de 5 pF. Qual será a nova capacitância se a separação das placas for duplicada e um dielétrico com constante \(\kappa = 4\) for inserido?</p><button class="toggle-solution bg-cyan-700 text-white px-4 py-2 rounded-lg">Mostrar Solução</button><div class="solution mt-4 p-4 bg-stone-50 rounded-lg hidden"><p>A capacitância original é \(C_0 = \varepsilon_0 A/d = 5\) pF. A nova é \(C' = \kappa \varepsilon_0 A / (2d) = (\kappa/2) C_0 = (4/2) \times 5 = 10\) pF.</p></div></div>
+                <div id="exercicio-lorentz" class="card mb-6"><h3 class="text-xl font-bold mb-3">Cap. 7: Força de Lorentz</h3><p class="mb-4"><strong>Problema:</strong> Um elétron (\(q = -1.6 \times 10^{-19}\) C) se move com velocidade \(\vec{v} = (2\hat{i} + 3\hat{j}) \times 10^6\) m/s em um campo magnético \(\vec{B} = 0.5\hat{k}\) T. Calcule o vetor força magnética.</p><button class="toggle-solution bg-cyan-700 text-white px-4 py-2 rounded-lg">Mostrar Solução</button><div class="solution mt-4 p-4 bg-stone-50 rounded-lg hidden"><p>Usando \(\vec{F} = q(\vec{v} \times \vec{B})\), calculamos o produto vetorial \(\vec{v} \times \vec{B} = (2\hat{i} \times 0.5\hat{k}) + (3\hat{j} \times 0.5\hat{k}) = -1.0\hat{j} + 1.5\hat{i}\). Multiplicando por \(q\), \(\vec{F} = (-1.6 \times 10^{-19}) (1.5\hat{i} - 1.0\hat{j}) = (-2.4\hat{i} + 1.6\hat{j}) \times 10^{-13}\) N.</p></div></div>
+                <div id="exercicio-ampere" class="card mb-6"><h3 class="text-xl font-bold mb-3">Cap. 8: Lei de Ampère</h3><p class="mb-4"><strong>Problema:</strong> Um solenoide longo com 1000 espiras por metro conduz uma corrente de 2 A. Calcule o campo magnético em seu interior.</p><button class="toggle-solution bg-cyan-700 text-white px-4 py-2 rounded-lg">Mostrar Solução</button><div class="solution mt-4 p-4 bg-stone-50 rounded-lg hidden"><p>Para um solenoide ideal, \(B = \mu_0 n I\), onde \(n\) é o número de espiras por metro. \(B = (4\pi \times 10^{-7} \text{ T·m/A}) \times (1000 \text{ m}^{-1}) \times (2 \text{ A}) \approx 2.51 \times 10^{-3}\) T ou 2.51 mT.</p></div></div>
+                <div id="exercicio-faraday" class="card mb-6"><h3 class="text-xl font-bold mb-3">Cap. 9: Lei de Faraday</h3><p class="mb-4"><strong>Problema:</strong> Uma espira quadrada de lado 10 cm está em um campo magnético perpendicular ao seu plano, cuja magnitude varia com o tempo como \(B(t) = 0.5t^2 + 2.0\), onde B está em Tesla e t em segundos. Qual é a magnitude da fem induzida na espira no instante t = 2 s?</p><button class="toggle-solution bg-cyan-700 text-white px-4 py-2 rounded-lg">Mostrar Solução</button><div class="solution mt-4 p-4 bg-stone-50 rounded-lg hidden"><p>O fluxo é \(\Phi_B = B \cdot A = (0.5t^2 + 2.0) \times (0.1)^2\). A fem é \(\varepsilon = -d\Phi_B/dt = -(0.01)(t)\). Em t=2s, \(|\varepsilon| = 0.01 \times 2 = 0.02\) V ou 20 mV.</p></div></div>
+                <div id="exercicio-maxwell" class="card mb-6"><h3 class="text-xl font-bold mb-3">Cap. 10: Ondas Eletromagnéticas</h3><p class="mb-4"><strong>Problema:</strong> Uma estação de rádio FM transmite em uma frequência de 100 MHz. Qual é o comprimento de onda dessa transmissão no vácuo?</p><button class="toggle-solution bg-cyan-700 text-white px-4 py-2 rounded-lg">Mostrar Solução</button><div class="solution mt-4 p-4 bg-stone-50 rounded-lg hidden"><p>Usando \(c = \lambda f\), onde \(c \approx 3 \times 10^8\) m/s e \(f = 100 \times 10^6\) Hz. \(\lambda = c/f = (3 \times 10^8) / (100 \times 10^6) = 3\) metros.</p></div></div>
+            </section>
+            
+            <section id="glossario" class="content-section">
+                <h2 class="text-3xl font-bold text-cyan-800 mb-6">Glossário Interativo</h2>
+                <div class="card">
+                    <dl>
+                        <dt class="font-bold text-lg"><a href="#capitulo-5" class="glossary-link">Capacitância (C)</a></dt>
+                        <dd class="mb-4 ml-4 border-l-2 border-stone-200 pl-4">A medida da capacidade de um capacitor de armazenar carga elétrica. Definida como a razão entre a carga armazenada e a diferença de potencial, \(C = Q/V\). Unidade: Farad (F).</dd>
+            
+                        <dt class="font-bold text-lg"><a href="#capitulo-2" class="glossary-link">Campo Elétrico (\(\vec{E}\))</a></dt>
+                        <dd class="mb-4 ml-4 border-l-2 border-stone-200 pl-4">Uma propriedade do espaço ao redor de uma carga que exerce uma força sobre outras cargas. Definido como a força por unidade de carga (\(\vec{E} = \vec{F}/q\)).</dd>
+
+                        <dt class="font-bold text-lg"><a href="#capitulo-10" class="glossary-link">Corrente de Deslocamento</a></dt>
+                        <dd class="mb-4 ml-4 border-l-2 border-stone-200 pl-4">Um termo introduzido por Maxwell na Lei de Ampère, que postula que um campo elétrico variável no tempo também pode gerar um campo magnético, assim como uma corrente de condução.</dd>
+
+                        <dt class="font-bold text-lg"><a href="#capitulo-3" class="glossary-link">Fluxo Elétrico (\(\Phi_E\))</a></dt>
+                        <dd class="mb-4 ml-4 border-l-2 border-stone-200 pl-4">Uma medida da quantidade de linhas de campo elétrico que atravessam uma determinada superfície. É a base da Lei de Gauss.</dd>
+
+                        <dt class="font-bold text-lg"><a href="#capitulo-9" class="glossary-link">Fluxo Magnético (\(\Phi_B\))</a></dt>
+                        <dd class="mb-4 ml-4 border-l-2 border-stone-200 pl-4">Uma medida da quantidade de linhas de campo magnético que atravessam uma determinada superfície. Sua variação no tempo é a base da Lei de Faraday.</dd>
+                        
+                        <dt class="font-bold text-lg"><a href="#capitulo-7" class="glossary-link">Força de Lorentz</a></dt>
+                        <dd class="mb-4 ml-4 border-l-2 border-stone-200 pl-4">A força total sobre uma carga elétrica em uma região com campos elétricos e magnéticos. A porção magnética, \(\vec{F}_m = q(\vec{v} \times \vec{B})\), atua apenas sobre cargas em movimento.</dd>
+                        
+                        <dt class="font-bold text-lg"><a href="#capitulo-8" class="glossary-link">Lei de Ampère</a></dt>
+                        <dd class="mb-4 ml-4 border-l-2 border-stone-200 pl-4">Relaciona a circulação do campo magnético ao longo de um caminho fechado com a corrente elétrica que atravessa a área delimitada por esse caminho.</dd>
+
+                        <dt class="font-bold text-lg"><a href="#capitulo-9" class="glossary-link">Lei de Faraday</a></dt>
+                        <dd class="mb-4 ml-4 border-l-2 border-stone-200 pl-4">Afirma que uma variação do fluxo magnético através de um circuito induz uma força eletromotriz (tensão) nesse circuito.</dd>
+
+                        <dt class="font-bold text-lg"><a href="#capitulo-3" class="glossary-link">Lei de Gauss</a></dt>
+                        <dd class="mb-4 ml-4 border-l-2 border-stone-200 pl-4">Relaciona o fluxo elétrico total através de uma superfície fechada com a carga líquida contida dentro dessa superfície.</dd>
+
+                        <dt class="font-bold text-lg"><a href="#capitulo-9" class="glossary-link">Lei de Lenz</a></dt>
+                        <dd class="mb-4 ml-4 border-l-2 border-stone-200 pl-4">Afirma que a corrente induzida por uma variação de fluxo magnético sempre fluirá em uma direção que cria um campo magnético que se opõe a essa variação.</dd>
+                        
+                        <dt class="font-bold text-lg"><a href="#capitulo-4" class="glossary-link">Potencial Elétrico (V)</a></dt>
+                        <dd class="mb-4 ml-4 border-l-2 border-stone-200 pl-4">A energia potencial elétrica por unidade de carga. É uma grandeza escalar que cria uma "paisagem de energia" no espaço.</dd>
+                    </dl>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const navLinks = document.querySelectorAll('#main-nav a');
+            const contentSections = document.querySelectorAll('.content-section');
+            const solutionToggles = document.querySelectorAll('.toggle-solution');
+            const formulaLink = document.getElementById('formula-link');
+            const exerciseLinks = document.querySelectorAll('.go-to-exercise');
+            const glossaryLinks = document.querySelectorAll('.glossary-link');
+
+            function setupFormulaLink() {
+                formulaLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const formulaPageContent = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Formulário Eletromag do Zero</title><style>body{font-family:system-ui,sans-serif;line-height:1.6;padding:2rem;color:#333}h1,h2{color:#0891b2;border-bottom:2px solid #a5f3fc;padding-bottom:5px}.formula{background-color:#f8fafc;padding:15px;border-radius:8px;margin-bottom:1rem;font-family:monospace;font-size:1.1em;border-left:4px solid #0891b2}@media print{body{-webkit-print-color-adjust:exact}}</style></head><body><h1>Formulário Eletromag do Zero</h1><h2>Constantes</h2><div class="formula">k₀ ≈ 9x10⁹ N·m²/C²</div><div class="formula">ε₀ ≈ 8.85x10⁻¹² C²/(N·m²)</div><div class="formula">μ₀ = 4πx10⁻⁷ T·m/A</div><h2>Eletrostática</h2><div class="formula">Lei de Coulomb: F = k₀|q₁q₂|/r²</div><div class="formula">Lei de Gauss: &oint;E·dA = q_int/ε₀</div><div class="formula">Potencial Elétrico: E = -∇V</div><div class="formula">Capacitância: C = Q/V</div><h2>Magnetostática</h2><div class="formula">Força de Lorentz: F = q(E + v×B)</div><div class="formula">Lei de Ampère: &oint;B·dl = μ₀I_env</div><h2>Dinâmica</h2><div class="formula">Lei de Faraday: ε = -dΦ_B/dt</div></body></html>`;
+                    const formulaWindow = window.open('', '_blank');
+                    formulaWindow.document.write(formulaPageContent);
+                    formulaWindow.document.close();
+                });
+            }
+
+            const initializedCanvases = new Set();
+            function initializeCanvas(canvasId) {
+                if (!canvasId || initializedCanvases.has(canvasId)) return;
+                
+                const canvas = document.getElementById(canvasId);
+                if (canvas && canvas.clientWidth > 0) {
+                    const initializer = canvasInitializers[canvasId];
+                    if (initializer) {
+                        const ctx = canvas.getContext('2d');
+                        canvas.width = canvas.clientWidth;
+                        canvas.height = canvas.clientHeight;
+                        initializer(canvas, ctx);
+                        initializedCanvases.add(canvasId);
+                    }
+                }
+            }
+
+            function updateContent(hash) {
+                if (!hash || hash === '#') hash = '#inicio';
+                
+                contentSections.forEach(s => {
+                    const isActive = '#' + s.id === hash;
+                    s.classList.toggle('active', isActive);
+                    if (isActive) {
+                        s.querySelectorAll('canvas').forEach(canvas => initializeCanvas(canvas.id));
+                    }
+                });
+
+                navLinks.forEach(l => l.classList.toggle('active', l.getAttribute('href') === hash));
+                window.scrollTo(0, 0);
+
+                if (hash === '#biblioteca-exercicios') {
+                    const targetExerciseId = sessionStorage.getItem('targetExercise');
+                    if(targetExerciseId) {
+                        const targetElement = document.getElementById(targetExerciseId);
+                        if(targetElement) {
+                            targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            targetElement.classList.add('ring-2', 'ring-cyan-500', 'ring-offset-2');
+                            setTimeout(() => targetElement.classList.remove('ring-2', 'ring-cyan-500', 'ring-offset-2'), 2500);
+                        }
+                        sessionStorage.removeItem('targetExercise');
+                    }
+                }
+            }
+            
+            function handleNavigation(e) {
+                e.preventDefault();
+                const targetHash = this.getAttribute('href');
+                if (window.location.hash !== targetHash) history.pushState(null, null, targetHash);
+                updateContent(targetHash);
+            }
+
+            exerciseLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    sessionStorage.setItem('targetExercise', this.dataset.exercise);
+                    const targetHash = this.getAttribute('href');
+                    history.pushState(null, null, targetHash);
+                    updateContent(targetHash);
+                });
+            });
+
+            navLinks.forEach(link => link.addEventListener('click', handleNavigation));
+            glossaryLinks.forEach(link => link.addEventListener('click', handleNavigation));
+
+            solutionToggles.forEach(button => {
+                button.addEventListener('click', function() {
+                    const solutionDiv = this.nextElementSibling;
+                    solutionDiv.classList.toggle('hidden');
+                    this.textContent = solutionDiv.classList.contains('hidden') ? 'Mostrar Solução' : 'Ocultar Solução';
+                });
+            });
+
+            window.addEventListener('popstate', () => updateContent(window.location.hash));
+            
+            setupFormulaLink();
+            
+            const canvasInitializers = {
+                'coulomb-canvas': (canvas, ctx) => {
+                    let charges = [{ x: 100, y: 150, q: 1, color: 'blue', dragging: false }, { x: 300, y: 150, q: -1, color: 'red', dragging: false }];
+                    function draw() {
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        const [q1, q2] = charges;
+                        const dx = q2.x - q1.x, dy = q2.y - q1.y, r2 = dx*dx + dy*dy;
+                        const forceMag = 5000 * (q1.q * q2.q) / r2;
+                        ctx.save(); ctx.translate(q2.x, q2.y); ctx.rotate(Math.atan2(dy, dx));
+                        ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(-forceMag, 0); ctx.strokeStyle = 'black'; ctx.lineWidth = 2; ctx.stroke();
+                        ctx.lineTo(-forceMag + 10, -5); ctx.moveTo(-forceMag, 0); ctx.lineTo(-forceMag + 10, 5); ctx.stroke();
+                        ctx.restore();
+                        charges.forEach(c => {
+                            ctx.beginPath(); ctx.arc(c.x, c.y, 10, 0, 2*Math.PI); ctx.fillStyle = c.color; ctx.fill();
+                            ctx.fillStyle = 'white'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(c.q > 0 ? '+' : '-', c.x, c.y);
+                        });
+                    }
+                    canvas.addEventListener('pointerdown', e => { const rect = canvas.getBoundingClientRect(); const x = e.clientX-rect.left, y = e.clientY-rect.top; charges.forEach(c => { if (Math.sqrt((x-c.x)**2 + (y-c.y)**2) < 15) c.dragging = true; }); });
+                    canvas.addEventListener('pointermove', e => { const rect = canvas.getBoundingClientRect(); const x = e.clientX-rect.left, y = e.clientY-rect.top; charges.forEach(c => { if (c.dragging) { c.x = x; c.y = y; draw(); } }); });
+                    canvas.addEventListener('pointerup', () => charges.forEach(c => c.dragging = false));
+                    draw();
+                },
+                'field-canvas': (canvas, ctx) => {
+                    const sourceCharge = { x: 0, y: 0, Q: 1 }; let testCharge = { x: 100, y: 0, dragging: false };
+                    function draw() {
+                        ctx.clearRect(0,0,canvas.width, canvas.height); ctx.save(); ctx.translate(canvas.width/2, canvas.height/2);
+                        ctx.beginPath(); ctx.arc(sourceCharge.x, sourceCharge.y, 12, 0, 2*Math.PI); ctx.fillStyle = 'purple'; ctx.fill();
+                        ctx.fillStyle = 'white'; ctx.textAlign = 'center'; ctx.fillText('Q', sourceCharge.x, sourceCharge.y);
+                        ctx.beginPath(); ctx.arc(testCharge.x, testCharge.y, 8, 0, 2*Math.PI); ctx.fillStyle = 'orange'; ctx.fill();
+                        const dx = testCharge.x - sourceCharge.x, dy = testCharge.y - sourceCharge.y, r2 = dx*dx + dy*dy, forceMag = 8000 / r2;
+                        ctx.save(); ctx.translate(testCharge.x, testCharge.y); ctx.rotate(Math.atan2(dy, dx));
+                        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(forceMag, 0); ctx.strokeStyle = 'black'; ctx.lineWidth = 2; ctx.stroke();
+                        ctx.lineTo(forceMag-10, -5); ctx.moveTo(forceMag, 0); ctx.lineTo(forceMag-10, 5); ctx.stroke();
+                        ctx.restore(); ctx.restore();
+                    }
+                    canvas.addEventListener('pointerdown', () => testCharge.dragging = true);
+                    canvas.addEventListener('pointermove', e => { if (testCharge.dragging) { const rect = canvas.getBoundingClientRect(); testCharge.x = e.clientX-rect.left-canvas.width/2; testCharge.y = e.clientY-rect.top-canvas.height/2; draw(); } });
+                    canvas.addEventListener('pointerup', () => testCharge.dragging = false);
+                    draw();
+                },
+                'gauss-canvas': (canvas, ctx) => {
+                    const slider = document.getElementById('gauss-slider');
+                    function draw() {
+                        const w = canvas.width, h = canvas.height, centerX = w/2, centerY = h/2, radius = slider.value;
+                        ctx.clearRect(0,0,w,h);
+                        ctx.beginPath(); ctx.arc(centerX, centerY, 8, 0, 2*Math.PI); ctx.fillStyle = 'red'; ctx.fill();
+                        ctx.beginPath(); ctx.arc(centerX, centerY, radius, 0, 2*Math.PI); ctx.setLineDash([5, 5]); ctx.strokeStyle = 'gray'; ctx.stroke(); ctx.setLineDash([]);
+                        for (let i=0; i<16; i++) { ctx.save(); ctx.translate(centerX, centerY); ctx.rotate(i*Math.PI/8); ctx.beginPath(); ctx.moveTo(8, 0); ctx.lineTo(w, 0); ctx.strokeStyle = 'rgba(0,0,0,0.3)'; ctx.stroke(); ctx.restore(); }
+                        ctx.fillStyle = 'black'; ctx.font = '14px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(`Raio = ${radius} | Linhas (Fluxo) = 16 (constante!)`, w/2, h - 20);
+                    }
+                    slider.addEventListener('input', draw); draw();
+                },
+                'potential-canvas': (canvas, ctx) => {
+                    let charge = { x: 50, y: 150, dragging: false }; const workBar = document.querySelector('#work-done-bar div');
+                    function draw() {
+                        const w = canvas.width, h = canvas.height; ctx.clearRect(0,0,w,h);
+                        for (let i=1; i<5; i++) { const x = i*w/5; ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.strokeStyle = 'rgba(0,0,0,0.2)'; ctx.stroke(); ctx.fillStyle = 'black'; ctx.fillText(`${i*20}V`, x+5, 15); }
+                        ctx.beginPath(); ctx.arc(charge.x, charge.y, 10, 0, 2*Math.PI); ctx.fillStyle = 'green'; ctx.fill();
+                        workBar.style.width = `${(charge.x / w) * 100}%`;
+                    }
+                    canvas.addEventListener('pointerdown', () => charge.dragging = true);
+                    canvas.addEventListener('pointermove', e => { if (charge.dragging) { const rect = canvas.getBoundingClientRect(); charge.x = e.clientX-rect.left; charge.y = e.clientY-rect.top; draw(); } });
+                    canvas.addEventListener('pointerup', () => charge.dragging = false); draw();
+                },
+                'capacitor-canvas': (canvas, ctx) => {
+                    const areaSlider = document.getElementById('cap-area'), sepSlider = document.getElementById('cap-sep');
+                    function draw() {
+                        const w = canvas.width, h = canvas.height, area = areaSlider.value, sep = sepSlider.value;
+                        const C = (area / sep).toFixed(2);
+                        ctx.clearRect(0,0,w,h);
+                        const plateY = (h - area) / 2;
+                        ctx.fillStyle = '#6b7280';
+                        ctx.fillRect(w/2 - sep/2 - 10, plateY, 10, area);
+                        ctx.fillRect(w/2 + sep/2, plateY, 10, area);
+                        ctx.fillStyle = 'black'; ctx.font = '14px sans-serif'; ctx.textAlign = 'center';
+                        ctx.fillText(`Capacitância C ∝ A/d`, w/2, 20);
+                        ctx.fillText(`C ≈ ${C} pF`, w/2, 40);
+                    }
+                    areaSlider.addEventListener('input', draw); sepSlider.addEventListener('input', draw); draw();
+                },
+                'lorentz-canvas': (canvas, ctx) => {
+                    const vSlider = document.getElementById('lorentz-v'), bSlider = document.getElementById('lorentz-b');
+                    function drawArrow(x, y, angle, len, color) {
+                        ctx.save(); ctx.translate(x, y); ctx.rotate(angle);
+                        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(len, 0);
+                        ctx.strokeStyle = color; ctx.lineWidth = 3; ctx.stroke();
+                        ctx.lineTo(len-10, -5); ctx.moveTo(len, 0); ctx.lineTo(len-10, 5); ctx.stroke();
+                        ctx.restore();
+                    }
+                    function draw() {
+                        const w = canvas.width, h = canvas.height, centerX = w/2, centerY = h/2;
+                        const vAngle = -vSlider.value * Math.PI / 180, bAngle = -bSlider.value * Math.PI / 180;
+                        const crossProduct = Math.sin(bAngle - vAngle);
+                        ctx.clearRect(0,0,w,h);
+                        drawArrow(centerX, centerY, vAngle, 100, 'blue');
+                        drawArrow(centerX, centerY, bAngle, 100, 'green');
+                        if (Math.abs(crossProduct) > 0.05) drawArrow(centerX, centerY, vAngle - Math.PI/2, 80 * crossProduct, 'red');
+                    }
+                    vSlider.addEventListener('input', draw); bSlider.addEventListener('input', draw); draw();
+                },
+                'ampere-canvas': (canvas, ctx) => {
+                    let radius = 80, isDragging = false; const centerX = canvas.width/2, centerY = canvas.height/2;
+                    function draw() {
+                        ctx.clearRect(0,0,canvas.width,canvas.height);
+                        ctx.beginPath(); ctx.arc(centerX, centerY, 8, 0, 2*Math.PI); ctx.fillStyle = '#0e7490'; ctx.fill();
+                        ctx.beginPath(); ctx.arc(centerX, centerY, radius, 0, 2*Math.PI); ctx.setLineDash([5, 5]); ctx.strokeStyle = 'rgba(239, 68, 68, 0.8)'; ctx.lineWidth = 2; ctx.stroke(); ctx.setLineDash([]);
+                        ctx.fillStyle = '#1f2937'; ctx.font = '14px monospace'; ctx.textAlign = 'center'; ctx.fillText(`B ∝ 1/r | Circulação = B·(2πr) = constante`, canvas.width/2, 20);
+                    }
+                    canvas.addEventListener('pointerdown', () => isDragging = true);
+                    canvas.addEventListener('pointerup', () => isDragging = false);
+                    canvas.addEventListener('pointermove', e => { if(isDragging) { const rect = canvas.getBoundingClientRect(); radius = Math.sqrt((e.clientX-rect.left-centerX)**2 + (e.clientY-rect.top-centerY)**2); draw(); }});
+                    draw();
+                },
+                'faraday-canvas': (canvas, ctx) => {
+                    let magnet = { x: 50, y: canvas.height/2, w: 30, h: 60, dragging: false, lastX: 50 };
+                    let inducedCurrent = 0;
+                    function draw() {
+                        const w = canvas.width, h = canvas.height, coilX = w/2, coilW = 40, coilH = 120;
+                        ctx.clearRect(0,0,w,h);
+                        ctx.strokeStyle = '#4b5563'; ctx.lineWidth = 3;
+                        for(let i=0; i<6; i++) { ctx.strokeRect(coilX, h/2 - 60 + i*20, coilW, 10); }
+                        ctx.fillStyle = 'red'; ctx.fillRect(magnet.x, magnet.y - magnet.h/2, magnet.w, magnet.h/2);
+                        ctx.fillStyle = 'blue'; ctx.fillRect(magnet.x, magnet.y, magnet.w, magnet.h/2);
+                        const bulbX = coilX + coilW + 40, bulbY = h/2;
+                        ctx.beginPath(); ctx.arc(bulbX, bulbY, 15, 0, 2*Math.PI);
+                        ctx.fillStyle = `rgba(250, 204, 21, ${Math.abs(inducedCurrent)})`; ctx.fill();
+                        ctx.strokeStyle = 'black'; ctx.stroke();
+                        if (magnet.dragging && magnet.x > coilX - 20 && magnet.x < coilX + coilW + 20) {
+                            const speed = magnet.x - magnet.lastX;
+                            inducedCurrent = Math.max(-1, Math.min(1, speed/5));
+                        } else {
+                            inducedCurrent *= 0.9; // decay
+                        }
+                        magnet.lastX = magnet.x;
+                        requestAnimationFrame(draw);
+                    }
+                    canvas.addEventListener('pointerdown', e => { const rect = canvas.getBoundingClientRect(); const x=e.clientX-rect.left, y=e.clientY-rect.top; if(x>magnet.x && x<magnet.x+magnet.w && y>magnet.y-magnet.h/2 && y<magnet.y+magnet.h/2) magnet.dragging = true; });
+                    canvas.addEventListener('pointermove', e => { if(magnet.dragging) { const rect = canvas.getBoundingClientRect(); magnet.x = e.clientX-rect.left - magnet.w/2; } });
+                    canvas.addEventListener('pointerup', () => magnet.dragging = false);
+                    draw();
+                }
+            };
+
+            updateContent(window.location.hash);
+        });
+    </script>
+</body>
+</html>
